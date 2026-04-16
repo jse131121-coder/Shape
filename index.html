@@ -18,15 +18,16 @@
             content: ''; position: absolute; top: -22px; right: 30px;
             border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #1E0A40;
         }
-        /* 말풍선 디자인 */
-        .chat-me { border-radius: 20px 4px 20px 20px; background-color: #1E0A40; color: white; }
-        .chat-other { border-radius: 4px 20px 20px 20px; background-color: #FFFFFF; color: #1E0A40; border: 1px solid #E5E7EB; }
+        /* 말풍선 스타일 */
+        .chat-me { border-radius: 20px 4px 20px 20px; background-color: #1E0A40; color: white; text-align: left; }
+        .chat-other { border-radius: 4px 20px 20px 20px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #E5E7EB; text-align: left; }
+        .badge-gradient { background: linear-gradient(to right, #E2B7FD, #A855F7); }
         input { font-size: 16px !important; }
     </style>
 </head>
 <body class="flex justify-center items-center h-screen bg-gray-100">
 
-    <div id="app" class="w-full max-w-[450px] h-full bg-[#F8F4FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl text-center">
+    <div id="app" class="w-full max-w-[450px] h-full bg-[#F8F4FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl">
         
         <header id="main-header" class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md border-b border-purple-50 z-[60]">
             <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="checkAuthAndShow('list')">SHAPE</h1>
@@ -38,7 +39,7 @@
 
         <div id="popup-overlay" class="hidden absolute inset-0 bg-black/10 z-[70]" onclick="togglePopup()"></div>
         <div id="add-chat-popup" class="hidden bubble-popup z-[80]">
-            <div class="space-y-4 text-left">
+            <div class="space-y-4">
                 <div><label class="block font-black mb-1 ml-2 text-sm">채팅 초대자</label><input type="text" id="new-invite" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
                 <div><label class="block font-black mb-1 ml-2 text-sm">채팅방 이름</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
                 <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2">생성하기</button>
@@ -69,7 +70,10 @@
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
         let myProfile = JSON.parse(localStorage.getItem('myProfile')) || { name: "GARIN", id: "GARIN" };
         let chatRooms = JSON.parse(localStorage.getItem('chatRooms')) || [
-            { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [] },
+            { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [
+                { sender: 'REINA', text: "루카님 사랑해용💜", time: "17:10", isMe: false },
+                { sender: 'HANSEOL', text: "디자인 대박 예뻐요!", time: "17:12", isMe: false }
+            ]},
             { id: 2, name: "Shape", sub: "공식 채팅방", messages: [] }
         ];
 
@@ -93,16 +97,16 @@
         function showView(view, roomId = null) {
             plusBtn.classList.add('hidden');
             navBar.style.display = (view === 'login' || view === 'chat') ? 'none' : 'flex';
-            makeBtn.style.display = (view === 'login') ? 'none' : 'block';
+            mainHeader.style.display = (view === 'chat') ? 'none' : 'flex';
 
             if(view === 'login') {
                 content.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full p-8 pb-32">
-                        <div class="bubble-popup !static !w-full !translate-y-0 text-left">
+                        <div class="bubble-popup !static !w-full !translate-y-0">
                             <h2 class="text-2xl font-black mb-6 text-center tracking-tighter">LOGIN</h2>
                             <div class="space-y-4">
-                                <div><label class="font-black text-sm ml-2">ID</label><input type="text" id="login-id" placeholder="${myProfile.id}" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
-                                <div><label class="font-black text-sm ml-2">PW</label><input type="password" id="login-pw" placeholder="1234" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
+                                <div><label class="font-black text-sm ml-2 text-left block">ID</label><input type="text" id="login-id" placeholder="${myProfile.id}" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
+                                <div><label class="font-black text-sm ml-2 text-left block">PW</label><input type="password" id="login-pw" placeholder="1234" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
                                 <button onclick="handleLogin()" class="w-full py-4 bg-[#1E0A40] text-white rounded-full font-black mt-4">LOGIN</button>
                             </div>
                         </div>
@@ -122,25 +126,22 @@
                         <div><label class="font-black text-xl">NEW NAME</label><input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
                         <div><label class="font-black text-xl">NEW ID</label><input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
                         <button onclick="saveSettings()" class="w-full py-4 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[20px] font-black shadow-lg">SAVE SETTINGS</button>
-                        <button onclick="localStorage.clear(); location.reload();" class="w-full py-2 text-red-400 font-bold text-sm underline mt-10 opacity-50">초기화</button>
                     </div>`;
             } 
             else if(view === 'chat') {
                 let currentRoom = chatRooms.find(r => r.id === roomId);
-                // 배경을 밝은 회색/흰색(#F9FAFB)으로 변경
                 content.innerHTML = `
                     <div class="flex flex-col h-full bg-[#F9FAFB]">
                         <div class="p-4 flex items-center gap-4 bg-white border-b border-gray-100 sticky top-0 z-20">
-                            <button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold shadow-sm">←</button>
+                            <button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button>
                             <h2 class="text-[#1E0A40] font-[900] text-2xl tracking-tighter">${currentRoom.name}</h2>
                         </div>
-                        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 hide-scroll">
-                            <div id="msg-list" class="space-y-6 pt-5"></div>
+                        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-8 hide-scroll pt-10">
+                            <div id="msg-list" class="space-y-8"></div>
                         </div>
                         <div class="p-4 bg-white flex items-center gap-2 pb-8 border-t border-gray-50">
                             <label class="bg-gray-100 w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer">
-                                <i data-lucide="camera" class="w-6 text-[#1E0A40]"></i>
-                                <input type="file" class="hidden" onchange="sendImage(this, ${roomId})">
+                                <i data-lucide="camera" class="w-6 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})">
                             </label>
                             <input type="text" id="m-input" placeholder="메시지..." class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-3 text-[#1E0A40] outline-none">
                             <button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-6 py-3 rounded-2xl font-[900]">send</button>
@@ -151,21 +152,10 @@
             lucide.createIcons();
         }
 
-        function saveSettings() {
-            myProfile.name = document.getElementById('set-name').value;
-            myProfile.id = document.getElementById('set-id').value;
-            saveData();
-            alert("저장되었습니다!");
-            showView('list');
-        }
-
         function renderListItem(room) {
             return `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all mb-4">
-                <div class="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
-                <div class="flex-1 text-left">
-                    <h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3>
-                    <p class="text-gray-400 text-sm truncate w-40">${room.sub}</p>
-                </div>
+                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
+                <div class="flex-1 text-left"><h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3><p class="text-gray-400 text-sm truncate w-40">${room.sub}</p></div>
             </div>`;
         }
 
@@ -174,15 +164,34 @@
             const list = document.getElementById('msg-list');
             if(!list) return;
             
-            list.innerHTML = room.messages.map(m => `
-                <div class="flex ${m.sender === 'ME' ? 'justify-end' : 'justify-start'} items-end gap-2">
-                    <div class="flex flex-col ${m.sender === 'ME' ? 'items-end' : 'items-start'} max-w-[80%] text-left">
-                        <div class="px-5 py-3 ${m.sender === 'ME' ? 'chat-me' : 'chat-other'} font-semibold shadow-sm text-[15px]">
-                            ${m.type === 'image' ? `<img src="${m.content}" class="rounded-lg max-w-full">` : m.text}
+            list.innerHTML = room.messages.map(m => {
+                if(m.isMe) {
+                    // 내 말풍선 (오른쪽)
+                    return `
+                    <div class="flex justify-end items-end gap-2 px-2">
+                        <div class="flex flex-col items-end max-w-[75%]">
+                            <div class="px-5 py-3 chat-me font-semibold shadow-sm text-[15px]">${m.text}</div>
+                            <span class="text-[10px] text-gray-400 mt-1 font-bold">${m.time}</span>
                         </div>
-                        <span class="text-[10px] text-gray-400 mt-1 font-bold">${m.time}</span>
-                    </div>
-                </div>`).join('');
+                    </div>`;
+                } else {
+                    // 남의 말풍선 (왼쪽 + 프사 + 이름 + 뱃지)
+                    return `
+                    <div class="flex justify-start items-start gap-3 px-2">
+                        <div class="w-11 h-11 rounded-2xl bg-purple-200 flex-shrink-0 flex items-center justify-center font-black text-[#1E0A40] border-2 border-white shadow-sm overflow-hidden">
+                            <img src="https://i.pravatar.cc/100?u=${m.sender}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex flex-col items-start max-w-[75%]">
+                            <div class="flex items-center gap-1.5 mb-1.5">
+                                <span class="text-[13px] font-black text-[#1E0A40]">${m.sender}</span>
+                                <span class="badge-gradient text-[9px] text-white px-2 py-0.5 rounded-full font-bold">V-LABEL</span>
+                            </div>
+                            <div class="px-5 py-3 chat-other font-semibold shadow-sm text-[15px]">${m.text}</div>
+                            <span class="text-[10px] text-gray-400 mt-1 font-bold">${m.time}</span>
+                        </div>
+                    </div>`;
+                }
+            }).join('');
             const box = document.getElementById('chat-box');
             box.scrollTop = box.scrollHeight;
         }
@@ -193,7 +202,8 @@
             if(!input.value.trim()) return;
             const now = new Date();
             room.messages.push({
-                sender: 'ME', // 내가 보내는 것
+                isMe: true, // 내꺼라고 표시!
+                sender: myProfile.name,
                 text: input.value,
                 time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
@@ -202,18 +212,12 @@
             renderChatContent(roomId);
         }
 
-        function sendImage(input, roomId) {
-            const room = chatRooms.find(r => r.id === roomId);
-            if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const now = new Date();
-                    room.messages.push({ sender: 'ME', type: 'image', content: e.target.result, time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0') });
-                    saveData();
-                    renderChatContent(roomId);
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+        function saveSettings() {
+            myProfile.name = document.getElementById('set-name').value;
+            myProfile.id = document.getElementById('set-id').value;
+            saveData();
+            alert("저장되었습니다!");
+            showView('list');
         }
 
         function addNewRoom() {
