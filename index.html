@@ -18,7 +18,6 @@
             content: ''; position: absolute; top: -22px; right: 30px;
             border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #1E0A40;
         }
-        /* iOS 스타일 말풍선 (비워진 상태에서 우리가 쓸 것) */
         .chat-me { border-radius: 20px 4px 20px 20px; background-color: #1E0A40; color: white; }
         .chat-other { border-radius: 4px 20px 20px 20px; background-color: white; color: #1E0A40; }
         input { font-size: 16px !important; }
@@ -29,8 +28,8 @@
     <div id="app" class="w-full max-w-[450px] h-full bg-[#F2E6FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl">
         
         <header id="main-header" class="flex items-center justify-between p-5 bg-white/60 backdrop-blur-md border-b border-purple-100 z-[60]">
-            <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="showView('list')">SHAPE</h1>
-            <button onclick="showView('login')" class="bg-gradient-to-br from-[#E2B7FD] to-[#A855F7] text-white px-6 py-2 rounded-2xl font-bold shadow-md active:scale-95 transition-all text-sm">MAKE</button>
+            <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="checkAuthAndShow('list')">SHAPE</h1>
+            <button id="make-btn" onclick="showView('login')" class="bg-gradient-to-br from-[#E2B7FD] to-[#A855F7] text-white px-6 py-2 rounded-2xl font-bold shadow-md active:scale-95 transition-all text-sm">MAKE</button>
         </header>
 
         <main id="main-content" class="flex-1 overflow-y-auto hide-scroll relative bg-[#F2E6FF]">
@@ -39,22 +38,22 @@
         <div id="popup-overlay" class="hidden absolute inset-0 bg-black/20 z-[70]" onclick="togglePopup()"></div>
         <div id="add-chat-popup" class="hidden bubble-popup z-[80]">
             <div class="space-y-4">
-                <div><label class="block font-black mb-1 ml-2">채팅 초대자</label><input type="text" id="new-invite" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                <div><label class="block font-black mb-1 ml-2">채팅방 이름</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
+                <div><label class="block font-black mb-1 ml-2 text-sm">채팅 초대자</label><input type="text" id="new-invite" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
+                <div><label class="block font-black mb-1 ml-2 text-sm">채팅방 이름</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
                 <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2">생성하기</button>
             </div>
         </div>
 
         <footer id="nav-bar" class="w-full h-20 bg-white border-t border-purple-100 flex justify-around items-center z-[60]">
-            <button onclick="showView('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]">
+            <button onclick="checkAuthAndShow('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]">
                 <i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-xs font-bold">채팅</span>
             </button>
-            <button onclick="showView('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300">
+            <button onclick="checkAuthAndShow('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300">
                 <i data-lucide="settings" class="w-7 h-7"></i><span class="text-xs font-bold">설정</span>
             </button>
         </footer>
 
-        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50">
+        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden">
             <i data-lucide="plus"></i>
         </button>
     </div>
@@ -64,46 +63,77 @@
         const plusBtn = document.getElementById('plus-btn');
         const navBar = document.getElementById('nav-bar');
         const mainHeader = document.getElementById('main-header');
+        const makeBtn = document.getElementById('make-btn');
 
-        // 상태 관리 (내 정보 및 채팅 데이터)
+        // 상태 관리
+        let isLoggedIn = false;
         let myProfile = { name: "GARIN", id: "GARIN", color: "bg-[#FFB5E8]" };
         let chatRooms = [
             { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [] },
             { id: 2, name: "Shape", sub: "공식 채팅방", messages: [] }
         ];
-        let currentRoom = null;
+
+        // 권한 체크 후 화면 전환
+        function checkAuthAndShow(view) {
+            if(!isLoggedIn && view !== 'login') {
+                showView('login');
+            } else {
+                showView(view);
+            }
+        }
+
+        // 실제 로그인 처리 함수
+        function handleLogin() {
+            const idInput = document.getElementById('login-id').value;
+            const pwInput = document.getElementById('login-pw').value;
+            
+            // 단순하게 값이 있거나 버튼 누르면 성공 처리 (원하면 특정 ID/PW로 체크 가능)
+            isLoggedIn = true;
+            showView('list');
+        }
 
         function showView(view, roomId = null) {
-            plusBtn.style.display = (view === 'list') ? 'flex' : 'none';
-            navBar.style.display = (view === 'chat') ? 'none' : 'flex';
-            mainHeader.style.display = (view === 'chat') ? 'none' : 'flex';
+            // UI 초기화
+            plusBtn.classList.add('hidden');
+            navBar.style.display = (view === 'login' || view === 'chat') ? 'none' : 'flex';
+            makeBtn.style.display = (view === 'login') ? 'none' : 'block';
 
-            if(view === 'list') {
+            if(view === 'login') {
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full p-8 pb-32">
+                        <div class="bubble-popup !static !w-full !translate-y-0">
+                            <h2 class="text-2xl font-black mb-6 text-center">LOGIN</h2>
+                            <div class="space-y-4">
+                                <div><label class="font-black text-sm ml-2">ID</label><input type="text" id="login-id" placeholder="GARIN" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
+                                <div><label class="font-black text-sm ml-2">PW</label><input type="password" id="login-pw" placeholder="1234" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
+                                <button onclick="handleLogin()" class="w-full py-4 bg-[#1E0A40] text-white rounded-full font-black mt-4 hover:bg-black transition-all">LOGIN</button>
+                            </div>
+                        </div>
+                    </div>`;
+            } 
+            else if(view === 'list') {
+                plusBtn.classList.remove('hidden');
+                document.getElementById('nav-chat').classList.add('text-[#1E0A40]');
+                document.getElementById('nav-chat').classList.remove('text-gray-300');
+                document.getElementById('nav-set').classList.add('text-gray-300');
+                
                 content.innerHTML = `<div class="p-4 space-y-4 mt-16 pb-24">${chatRooms.map(room => renderListItem(room)).join('')}</div>`;
             } 
             else if(view === 'setting') {
+                document.getElementById('nav-set').classList.add('text-[#1E0A40]');
+                document.getElementById('nav-set').classList.remove('text-gray-300');
+                document.getElementById('nav-chat').classList.add('text-gray-300');
+
                 content.innerHTML = `
                     <div class="p-8 space-y-6">
-                        <div>
-                            <label class="font-black text-xl">NEW NAME</label>
-                            <input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none">
-                        </div>
-                        <div>
-                            <label class="font-black text-xl">NEW PHOTO</label>
-                            <div class="relative h-14 bg-[#1E0A40] rounded-[20px] mt-2 flex items-center px-6">
-                                <i data-lucide="cloud" class="text-white"></i>
-                                <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="font-black text-xl">NEW ID</label>
-                            <input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none">
-                        </div>
+                        <div><label class="font-black text-xl">NEW NAME</label><input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
+                        <div><label class="font-black text-xl">NEW PHOTO</label><div class="relative h-14 bg-[#1E0A40] rounded-[20px] mt-2 flex items-center px-6"><i data-lucide="cloud" class="text-white"></i><input type="file" class="absolute inset-0 opacity-0 cursor-pointer"></div></div>
+                        <div><label class="font-black text-xl">NEW ID</label><input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
                         <button onclick="saveSettings()" class="w-full py-4 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[20px] font-black shadow-lg">SAVE SETTINGS</button>
                     </div>`;
             } 
             else if(view === 'chat') {
-                currentRoom = chatRooms.find(r => r.id === roomId);
+                let currentRoom = chatRooms.find(r => r.id === roomId);
                 content.innerHTML = `
                     <div class="flex flex-col h-full bg-[#121212]">
                         <div class="p-4 flex items-center gap-4 bg-[#121212] border-b border-gray-800 sticky top-0 z-20">
@@ -118,42 +148,43 @@
                         <div class="p-4 bg-[#121212] flex items-center gap-2 pb-8">
                             <label class="bg-white w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer">
                                 <i data-lucide="camera" class="w-6 text-black"></i>
-                                <input type="file" class="hidden" onchange="sendImage(this)">
+                                <input type="file" class="hidden" onchange="sendImage(this, ${roomId})">
                             </label>
                             <input type="text" id="m-input" placeholder="메시지..." class="flex-1 bg-[#1E1E1E] border border-gray-700 rounded-2xl p-3 text-white outline-none">
-                            <button onclick="sendMsg()" class="bg-white text-black px-6 py-3 rounded-2xl font-[900]">send</button>
+                            <button onclick="sendMsg(${roomId})" class="bg-white text-black px-6 py-3 rounded-2xl font-[900]">send</button>
                         </div>
                     </div>`;
-                renderChatContent();
+                renderChatContent(roomId);
             }
             lucide.createIcons();
         }
 
         // 설정 저장 기능
         function saveSettings() {
-            const newName = document.getElementById('set-name').value;
-            const newId = document.getElementById('set-id').value;
-            if(!newName || !newId) return alert("빈칸을 채워주세요!");
-            
-            myProfile.name = newName;
-            myProfile.id = newId;
-            alert("설정이 저장되었습니다!");
+            myProfile.name = document.getElementById('set-name').value;
+            myProfile.id = document.getElementById('set-id').value;
+            alert("저장 완료!");
             showView('list');
         }
 
         function renderListItem(room) {
             return `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all mb-4">
                 <div class="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
-                <div><h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3><p class="text-gray-400 text-sm">${room.sub}</p></div>
+                <div class="flex-1">
+                    <h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3>
+                    <p class="text-gray-400 text-sm truncate w-48">${room.sub}</p>
+                </div>
+                <i data-lucide="chevron-right" class="text-gray-500"></i>
             </div>`;
         }
 
-        function renderChatContent() {
+        function renderChatContent(roomId) {
+            const room = chatRooms.find(r => r.id === roomId);
             const list = document.getElementById('msg-list');
-            if(!list || !currentRoom) return;
-            list.innerHTML = currentRoom.messages.length === 0 
-                ? `<div class="text-center text-gray-600 text-sm pt-10 font-bold">대화 내용이 없습니다.<br>첫 메시지를 보내보세요!</div>`
-                : currentRoom.messages.map(m => `
+            if(!list) return;
+            list.innerHTML = room.messages.length === 0 
+                ? `<div class="text-center text-gray-600 text-sm pt-10 font-bold">대화가 없습니다.</div>`
+                : room.messages.map(m => `
                 <div class="flex ${m.isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
                     <div class="flex flex-col ${m.isMe ? 'items-end' : 'items-start'} max-w-[80%]">
                         <div class="px-5 py-3 ${m.isMe ? 'chat-me' : 'chat-other'} font-semibold shadow-md text-[15px]">
@@ -166,31 +197,28 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        function sendMsg() {
+        function sendMsg(roomId) {
             const input = document.getElementById('m-input');
+            const room = chatRooms.find(r => r.id === roomId);
             if(!input.value.trim()) return;
             const now = new Date();
-            currentRoom.messages.push({
+            room.messages.push({
                 isMe: true,
                 text: input.value,
                 time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
             input.value = '';
-            renderChatContent();
+            renderChatContent(roomId);
         }
 
-        function sendImage(input) {
+        function sendImage(input, roomId) {
+            const room = chatRooms.find(r => r.id === roomId);
             if(input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const now = new Date();
-                    currentRoom.messages.push({
-                        isMe: true,
-                        type: 'image',
-                        content: e.target.result,
-                        time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
-                    });
-                    renderChatContent();
+                    room.messages.push({ isMe: true, type: 'image', content: e.target.result, time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0') });
+                    renderChatContent(roomId);
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -210,7 +238,8 @@
             document.getElementById('popup-overlay').classList.toggle('hidden');
         }
 
-        showView('list');
+        // 시작 시 로그인 화면 보여주기
+        showView('login');
         lucide.createIcons();
     </script>
 </body>
