@@ -1,0 +1,122 @@
+import React, { useState, useRef, useEffect } from 'react';
+
+// 1. 유저 데이터 정의
+const USERS = {
+  GARIN: { id: 'GARIN', name: '가린', color: 'bg-[#FFB5E8]', pw: '1234' },
+  REINA: { id: 'REINA', name: '레이나', color: 'bg-[#B5EAD7]', pw: '1234' },
+  HANSEOL: { id: 'HANSEOL', name: '한설', color: 'bg-[#C7CEEA]', pw: '1234' },
+  RIEH: { id: 'RIEH', name: '리에', color: 'bg-[#FFDAC1]', pw: '1234' },
+};
+
+const ChatApp = () => {
+  const [me] = useState(USERS.GARIN); // 현재 접속자를 '가린'으로 가정
+  const [messages, setMessages] = useState([
+    { id: 1, user: USERS.REINA, text: "다들 배포 준비 됐어?", type: "text", time: "오전 10:00" },
+    { id: 2, user: USERS.HANSEOL, text: "거의 다 됐어요! UI 대박 예쁨..", type: "text", time: "오전 10:01" },
+  ]);
+  const [input, setInput] = useState("");
+  const scrollRef = useRef(null);
+
+  // 스크롤 하단 유지
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
+  }, [messages]);
+
+  const onSend = (text, type = "text", file = null) => {
+    if (!text.trim() && !file) return;
+    const newMsg = {
+      id: Date.now(),
+      user: me,
+      text: text,
+      type: type,
+      file: file,
+      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages([...messages, newMsg]);
+    setInput("");
+  };
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      onSend("", "image", url);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-[#F5EEFF] max-w-[450px] mx-auto shadow-2xl overflow-hidden font-sans">
+      
+      {/* --- 헤더 (SHAPE 로고 & MAKE 버튼) --- */}
+      <header className="px-6 py-4 bg-white/40 backdrop-blur-xl border-b border-purple-100 flex justify-between items-center z-20">
+        <h1 className="text-4xl font-[900] tracking-tighter text-[#1E0A40]">SHAPE</h1>
+        <button className="bg-gradient-to-r from-[#C084FC] to-[#9333EA] text-white px-6 py-2 rounded-2xl font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all">
+          MAKE
+        </button>
+      </header>
+
+      {/* --- 채팅창 --- */}
+      <main ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        {messages.map((msg, idx) => {
+          const isMe = msg.user.id === me.id;
+          const showProfile = idx === 0 || messages[idx-1].user.id !== msg.user.id;
+
+          return (
+            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2`}>
+              {!isMe && showProfile && (
+                <div className={`w-10 h-10 rounded-2xl ${msg.user.color} flex-shrink-0 shadow-sm flex items-center justify-center font-bold text-[#1E0A40]`}>
+                  {msg.user.name[0]}
+                </div>
+              )}
+              {!isMe && !showProfile && <div className="w-10"></div>}
+
+              <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[70%]`}>
+                {!isMe && showProfile && <span className="text-xs font-bold text-[#1E0A40]/60 mb-1 ml-1">{msg.user.name}</span>}
+                
+                <div className={`relative px-4 py-2.5 rounded-[22px] shadow-sm ${
+                  isMe ? 'bg-[#1E0A40] text-white rounded-tr-none' : 'bg-white text-[#1E0A40] rounded-tl-none'
+                }`}>
+                  {msg.type === 'text' ? (
+                    <p className="text-[14px] leading-relaxed">{msg.text}</p>
+                  ) : (
+                    <img src={msg.file} alt="upload" className="rounded-lg max-w-full" />
+                  )}
+                </div>
+                <span className="text-[10px] text-[#1E0A40]/40 mt-1">{msg.time}</span>
+              </div>
+            </div>
+          );
+        })}
+      </main>
+
+      {/* --- 입력창 (기능 팍팍) --- */}
+      <footer className="p-4 bg-white/60 backdrop-blur-xl border-t border-purple-100">
+        <div className="flex items-center gap-3 bg-white/80 p-2 rounded-[25px] shadow-inner border border-purple-50">
+          <label className="cursor-pointer p-2 hover:bg-purple-100 rounded-full transition-colors text-[#1E0A40]">
+            <input type="file" className="hidden" onChange={handleFile} accept="image/*" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          </label>
+          
+          <input 
+            className="flex-1 bg-transparent border-none focus:outline-none text-[15px] text-[#1E0A40] placeholder-purple-300"
+            placeholder="메시지를 입력하세요..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && onSend(input)}
+          />
+
+          <button 
+            onClick={() => onSend(input)}
+            className="bg-[#1E0A40] text-white p-2.5 rounded-full hover:scale-110 active:scale-95 transition-all disabled:opacity-30"
+            disabled={!input.trim()}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div className="h-4"></div> {/* iOS 하단 바 여백 */}
+      </footer>
+    </div>
+  );
+};
+
+export default ChatApp;
