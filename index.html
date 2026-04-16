@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAPE</title>
+    <title>SHAPE - ARCADE SOCIAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -18,29 +18,30 @@
             content: ''; position: absolute; top: -22px; right: 30px;
             border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #1E0A40;
         }
+        /* iOS 스타일 말풍선 (비워진 상태에서 우리가 쓸 것) */
         .chat-me { border-radius: 20px 4px 20px 20px; background-color: #1E0A40; color: white; }
         .chat-other { border-radius: 4px 20px 20px 20px; background-color: white; color: #1E0A40; }
-        input { font-size: 16px !important; } /* iOS 줌 방지 */
+        input { font-size: 16px !important; }
     </style>
 </head>
 <body class="flex justify-center items-center h-screen bg-gray-200">
 
     <div id="app" class="w-full max-w-[450px] h-full bg-[#F2E6FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl">
         
-        <header class="flex items-center justify-between p-5 bg-white/60 backdrop-blur-md border-b border-purple-100 z-[60]">
+        <header id="main-header" class="flex items-center justify-between p-5 bg-white/60 backdrop-blur-md border-b border-purple-100 z-[60]">
             <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="showView('list')">SHAPE</h1>
             <button onclick="showView('login')" class="bg-gradient-to-br from-[#E2B7FD] to-[#A855F7] text-white px-6 py-2 rounded-2xl font-bold shadow-md active:scale-95 transition-all text-sm">MAKE</button>
         </header>
 
-        <main id="main-content" class="flex-1 overflow-y-auto hide-scroll relative">
+        <main id="main-content" class="flex-1 overflow-y-auto hide-scroll relative bg-[#F2E6FF]">
             </main>
 
         <div id="popup-overlay" class="hidden absolute inset-0 bg-black/20 z-[70]" onclick="togglePopup()"></div>
         <div id="add-chat-popup" class="hidden bubble-popup z-[80]">
             <div class="space-y-4">
-                <div><label class="block font-black mb-1 ml-2">채팅 초대자</label><input type="text" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                <div><label class="block font-black mb-1 ml-2">채팅방 이름</label><input type="text" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                <button onclick="togglePopup()" class="w-full py-2 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2">생성하기</button>
+                <div><label class="block font-black mb-1 ml-2">채팅 초대자</label><input type="text" id="new-invite" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
+                <div><label class="block font-black mb-1 ml-2">채팅방 이름</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
+                <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2">생성하기</button>
             </div>
         </div>
 
@@ -62,72 +63,65 @@
         const content = document.getElementById('main-content');
         const plusBtn = document.getElementById('plus-btn');
         const navBar = document.getElementById('nav-bar');
+        const mainHeader = document.getElementById('main-header');
 
-        const USERS = {
-            GARIN: { name: 'GARIN', color: 'bg-[#FFB5E8]' },
-            REINA: { name: 'REINA', color: 'bg-[#B5EAD7]' },
-            HANSEOL: { name: 'HANSEOL', color: 'bg-[#C7CEEA]' },
-            RIEH: { name: 'RIEH', color: 'bg-[#FFDAC1]' }
-        };
-
-        let currentChatRoom = "KILLIN'";
-        let chatMessages = [
-            { user: USERS.REINA, text: "❕", time: "17:10" },
-            { user: USERS.HANSEOL, text: "😎", time: "17:12" }
+        // 상태 관리 (내 정보 및 채팅 데이터)
+        let myProfile = { name: "GARIN", id: "GARIN", color: "bg-[#FFB5E8]" };
+        let chatRooms = [
+            { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [] },
+            { id: 2, name: "Shape", sub: "공식 채팅방", messages: [] }
         ];
+        let currentRoom = null;
 
-        function showView(view) {
+        function showView(view, roomId = null) {
             plusBtn.style.display = (view === 'list') ? 'flex' : 'none';
             navBar.style.display = (view === 'chat') ? 'none' : 'flex';
-            
-            document.getElementById('nav-chat').classList.toggle('text-[#1E0A40]', view === 'list');
-            document.getElementById('nav-chat').classList.toggle('text-gray-300', view !== 'list');
-            document.getElementById('nav-set').classList.toggle('text-[#1E0A40]', view === 'setting');
-            document.getElementById('nav-set').classList.toggle('text-gray-300', view !== 'setting');
+            mainHeader.style.display = (view === 'chat') ? 'none' : 'flex';
 
             if(view === 'list') {
-                content.innerHTML = `
-                    <div class="p-4 space-y-4 mt-16 pb-24">
-                        ${renderListItem("KILLIN'", "가린, 레이나, 한설, 리에", "https://i.pravatar.cc/150?u=kil")}
-                        ${renderListItem("Shape", "공식 채팅방", "https://i.pravatar.cc/150?u=sha")}
-                        ${renderListItem("LUCA FAN", "최근 내용 없음", "")}
-                        ${renderListItem("ARCADE", "최근 내용 없음", "")}
-                    </div>`;
-            } else if(view === 'setting') {
+                content.innerHTML = `<div class="p-4 space-y-4 mt-16 pb-24">${chatRooms.map(room => renderListItem(room)).join('')}</div>`;
+            } 
+            else if(view === 'setting') {
                 content.innerHTML = `
                     <div class="p-8 space-y-6">
-                        <div><label class="font-black">NEW NAME</label><div class="h-14 bg-[#1E0A40] rounded-[20px] mt-2"></div></div>
-                        <div><label class="font-black">NEW PHOTO</label><div class="h-14 bg-[#1E0A40] rounded-[20px] mt-2 flex items-center px-6"><i data-lucide="cloud" class="text-white"></i></div></div>
-                        <div><label class="font-black">NEW ID</label><div class="h-14 bg-[#1E0A40] rounded-[20px] mt-2"></div></div>
-                        <div><label class="font-black">NEW PW</label><div class="h-14 bg-[#1E0A40] rounded-[20px] mt-2"></div></div>
-                    </div>`;
-            } else if(view === 'login') {
-                content.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full p-8 pb-32">
-                        <div class="bubble-popup !static !w-full !translate-y-0">
-                            <div class="space-y-4">
-                                <div><label class="font-black">ID</label><input type="text" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                                <div><label class="font-black">PW</label><input type="password" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                                <button onclick="showView('list')" class="w-full py-3 bg-[#1E0A40] text-white rounded-full font-black mt-2">LOGIN</button>
+                        <div>
+                            <label class="font-black text-xl">NEW NAME</label>
+                            <input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none">
+                        </div>
+                        <div>
+                            <label class="font-black text-xl">NEW PHOTO</label>
+                            <div class="relative h-14 bg-[#1E0A40] rounded-[20px] mt-2 flex items-center px-6">
+                                <i data-lucide="cloud" class="text-white"></i>
+                                <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
                             </div>
                         </div>
+                        <div>
+                            <label class="font-black text-xl">NEW ID</label>
+                            <input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none">
+                        </div>
+                        <button onclick="saveSettings()" class="w-full py-4 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[20px] font-black shadow-lg">SAVE SETTINGS</button>
                     </div>`;
-            } else if(view === 'chat') {
+            } 
+            else if(view === 'chat') {
+                currentRoom = chatRooms.find(r => r.id === roomId);
                 content.innerHTML = `
                     <div class="flex flex-col h-full bg-[#121212]">
                         <div class="p-4 flex items-center gap-4 bg-[#121212] border-b border-gray-800 sticky top-0 z-20">
                             <button onclick="showView('list')" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button>
-                            <div class="w-10 h-10 rounded-full bg-pink-100"></div>
-                            <h2 class="text-white font-black text-xl">LUCA</h2>
+                            <div class="w-10 h-10 rounded-full bg-purple-200"></div>
+                            <h2 class="text-white font-[900] text-2xl tracking-tighter">${currentRoom.name}</h2>
                         </div>
                         <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 hide-scroll">
                             <div class="text-center"><span class="bg-white px-4 py-1 rounded-full text-[10px] font-bold">2026.04.16</span></div>
                             <div id="msg-list" class="space-y-6"></div>
                         </div>
-                        <div class="p-4 bg-[#121212] flex items-center gap-2">
-                            <div class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center"><i data-lucide="camera" class="w-6 text-black"></i></div>
+                        <div class="p-4 bg-[#121212] flex items-center gap-2 pb-8">
+                            <label class="bg-white w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer">
+                                <i data-lucide="camera" class="w-6 text-black"></i>
+                                <input type="file" class="hidden" onchange="sendImage(this)">
+                            </label>
                             <input type="text" id="m-input" placeholder="메시지..." class="flex-1 bg-[#1E1E1E] border border-gray-700 rounded-2xl p-3 text-white outline-none">
-                            <button onclick="sendMsg()" class="bg-white text-black px-5 py-2 rounded-2xl font-black">send</button>
+                            <button onclick="sendMsg()" class="bg-white text-black px-6 py-3 rounded-2xl font-[900]">send</button>
                         </div>
                     </div>`;
                 renderChatContent();
@@ -135,26 +129,39 @@
             lucide.createIcons();
         }
 
-        function renderListItem(name, sub, img) {
-            return `<div onclick="showView('chat')" class="bg-[#1E0A40] p-5 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all">
-                <div class="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center font-black">${img ? `<img src="${img}">` : 'PIC'}</div>
-                <div><h3 class="text-white text-xl font-black">${name}</h3><p class="text-gray-400 text-xs">${sub}</p></div>
+        // 설정 저장 기능
+        function saveSettings() {
+            const newName = document.getElementById('set-name').value;
+            const newId = document.getElementById('set-id').value;
+            if(!newName || !newId) return alert("빈칸을 채워주세요!");
+            
+            myProfile.name = newName;
+            myProfile.id = newId;
+            alert("설정이 저장되었습니다!");
+            showView('list');
+        }
+
+        function renderListItem(room) {
+            return `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
+                <div><h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3><p class="text-gray-400 text-sm">${room.sub}</p></div>
             </div>`;
         }
 
         function renderChatContent() {
             const list = document.getElementById('msg-list');
-            if(!list) return;
-            list.innerHTML = chatMessages.map(m => `
-                <div class="flex ${m.user.name === 'GARIN' ? 'justify-end' : 'justify-start'} items-end gap-2">
-                    ${m.user.name !== 'GARIN' ? `<div class="w-9 h-9 rounded-full ${m.user.color} flex-shrink-0"></div>` : ''}
-                    <div class="flex flex-col ${m.user.name === 'GARIN' ? 'items-end' : 'items-start'} max-w-[70%]">
-                        ${m.user.name !== 'GARIN' ? `<span class="text-white text-[10px] mb-1 font-bold">${m.user.name}</span>` : ''}
-                        <div class="px-4 py-2 ${m.user.name === 'GARIN' ? 'chat-me' : 'chat-other'} font-medium shadow-md text-sm leading-relaxed">${m.text}</div>
-                        <span class="text-[9px] text-gray-500 mt-1">${m.time}</span>
+            if(!list || !currentRoom) return;
+            list.innerHTML = currentRoom.messages.length === 0 
+                ? `<div class="text-center text-gray-600 text-sm pt-10 font-bold">대화 내용이 없습니다.<br>첫 메시지를 보내보세요!</div>`
+                : currentRoom.messages.map(m => `
+                <div class="flex ${m.isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
+                    <div class="flex flex-col ${m.isMe ? 'items-end' : 'items-start'} max-w-[80%]">
+                        <div class="px-5 py-3 ${m.isMe ? 'chat-me' : 'chat-other'} font-semibold shadow-md text-[15px]">
+                            ${m.type === 'image' ? `<img src="${m.content}" class="rounded-lg max-w-full">` : m.text}
+                        </div>
+                        <span class="text-[10px] text-gray-500 mt-1 font-bold">${m.time}</span>
                     </div>
-                </div>
-            `).join('');
+                </div>`).join('');
             const box = document.getElementById('chat-box');
             box.scrollTop = box.scrollHeight;
         }
@@ -162,9 +169,40 @@
         function sendMsg() {
             const input = document.getElementById('m-input');
             if(!input.value.trim()) return;
-            chatMessages.push({ user: USERS.GARIN, text: input.value, time: "방금" });
+            const now = new Date();
+            currentRoom.messages.push({
+                isMe: true,
+                text: input.value,
+                time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+            });
             input.value = '';
             renderChatContent();
+        }
+
+        function sendImage(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const now = new Date();
+                    currentRoom.messages.push({
+                        isMe: true,
+                        type: 'image',
+                        content: e.target.result,
+                        time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+                    });
+                    renderChatContent();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function addNewRoom() {
+            const name = document.getElementById('new-room-name').value;
+            const invite = document.getElementById('new-invite').value;
+            if(!name) return;
+            chatRooms.push({ id: Date.now(), name: name, sub: invite, messages: [] });
+            togglePopup();
+            showView('list');
         }
 
         function togglePopup() {
