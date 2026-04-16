@@ -65,35 +65,33 @@
         const mainHeader = document.getElementById('main-header');
         const makeBtn = document.getElementById('make-btn');
 
-        // 상태 관리
-        let isLoggedIn = false;
-        let myProfile = { name: "GARIN", id: "GARIN", color: "bg-[#FFB5E8]" };
-        let chatRooms = [
+        // --- 데이터 저장/불러오기 로직 ---
+        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        let myProfile = JSON.parse(localStorage.getItem('myProfile')) || { name: "GARIN", id: "GARIN", color: "bg-[#FFB5E8]" };
+        let chatRooms = JSON.parse(localStorage.getItem('chatRooms')) || [
             { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [] },
             { id: 2, name: "Shape", sub: "공식 채팅방", messages: [] }
         ];
 
-        // 권한 체크 후 화면 전환
-        function checkAuthAndShow(view) {
-            if(!isLoggedIn && view !== 'login') {
-                showView('login');
-            } else {
-                showView(view);
-            }
+        function saveData() {
+            localStorage.setItem('isLoggedIn', isLoggedIn);
+            localStorage.setItem('myProfile', JSON.stringify(myProfile));
+            localStorage.setItem('chatRooms', JSON.stringify(chatRooms));
         }
 
-        // 실제 로그인 처리 함수
+        // 권한 체크
+        function checkAuthAndShow(view) {
+            if(!isLoggedIn && view !== 'login') showView('login');
+            else showView(view);
+        }
+
         function handleLogin() {
-            const idInput = document.getElementById('login-id').value;
-            const pwInput = document.getElementById('login-pw').value;
-            
-            // 단순하게 값이 있거나 버튼 누르면 성공 처리 (원하면 특정 ID/PW로 체크 가능)
             isLoggedIn = true;
+            saveData();
             showView('list');
         }
 
         function showView(view, roomId = null) {
-            // UI 초기화
             plusBtn.classList.add('hidden');
             navBar.style.display = (view === 'login' || view === 'chat') ? 'none' : 'flex';
             makeBtn.style.display = (view === 'login') ? 'none' : 'block';
@@ -104,7 +102,7 @@
                         <div class="bubble-popup !static !w-full !translate-y-0">
                             <h2 class="text-2xl font-black mb-6 text-center">LOGIN</h2>
                             <div class="space-y-4">
-                                <div><label class="font-black text-sm ml-2">ID</label><input type="text" id="login-id" placeholder="GARIN" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
+                                <div><label class="font-black text-sm ml-2">ID</label><input type="text" id="login-id" placeholder="${myProfile.id}" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
                                 <div><label class="font-black text-sm ml-2">PW</label><input type="password" id="login-pw" placeholder="1234" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
                                 <button onclick="handleLogin()" class="w-full py-4 bg-[#1E0A40] text-white rounded-full font-black mt-4 hover:bg-black transition-all">LOGIN</button>
                             </div>
@@ -116,20 +114,18 @@
                 document.getElementById('nav-chat').classList.add('text-[#1E0A40]');
                 document.getElementById('nav-chat').classList.remove('text-gray-300');
                 document.getElementById('nav-set').classList.add('text-gray-300');
-                
                 content.innerHTML = `<div class="p-4 space-y-4 mt-16 pb-24">${chatRooms.map(room => renderListItem(room)).join('')}</div>`;
             } 
             else if(view === 'setting') {
                 document.getElementById('nav-set').classList.add('text-[#1E0A40]');
                 document.getElementById('nav-set').classList.remove('text-gray-300');
                 document.getElementById('nav-chat').classList.add('text-gray-300');
-
                 content.innerHTML = `
                     <div class="p-8 space-y-6">
                         <div><label class="font-black text-xl">NEW NAME</label><input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
-                        <div><label class="font-black text-xl">NEW PHOTO</label><div class="relative h-14 bg-[#1E0A40] rounded-[20px] mt-2 flex items-center px-6"><i data-lucide="cloud" class="text-white"></i><input type="file" class="absolute inset-0 opacity-0 cursor-pointer"></div></div>
                         <div><label class="font-black text-xl">NEW ID</label><input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
                         <button onclick="saveSettings()" class="w-full py-4 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[20px] font-black shadow-lg">SAVE SETTINGS</button>
+                        <button onclick="localStorage.clear(); location.reload();" class="w-full py-2 text-red-500 font-bold text-sm underline mt-10">데이터 전체 초기화</button>
                     </div>`;
             } 
             else if(view === 'chat') {
@@ -138,12 +134,10 @@
                     <div class="flex flex-col h-full bg-[#121212]">
                         <div class="p-4 flex items-center gap-4 bg-[#121212] border-b border-gray-800 sticky top-0 z-20">
                             <button onclick="showView('list')" class="bg-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button>
-                            <div class="w-10 h-10 rounded-full bg-purple-200"></div>
                             <h2 class="text-white font-[900] text-2xl tracking-tighter">${currentRoom.name}</h2>
                         </div>
                         <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 hide-scroll">
-                            <div class="text-center"><span class="bg-white px-4 py-1 rounded-full text-[10px] font-bold">2026.04.16</span></div>
-                            <div id="msg-list" class="space-y-6"></div>
+                            <div id="msg-list" class="space-y-6 pt-10"></div>
                         </div>
                         <div class="p-4 bg-[#121212] flex items-center gap-2 pb-8">
                             <label class="bg-white w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer">
@@ -159,22 +153,21 @@
             lucide.createIcons();
         }
 
-        // 설정 저장 기능
         function saveSettings() {
             myProfile.name = document.getElementById('set-name').value;
             myProfile.id = document.getElementById('set-id').value;
-            alert("저장 완료!");
+            saveData();
+            alert("저장되었습니다!");
             showView('list');
         }
 
         function renderListItem(room) {
             return `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all mb-4">
                 <div class="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
-                <div class="flex-1">
+                <div class="flex-1 text-left">
                     <h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3>
                     <p class="text-gray-400 text-sm truncate w-48">${room.sub}</p>
                 </div>
-                <i data-lucide="chevron-right" class="text-gray-500"></i>
             </div>`;
         }
 
@@ -182,9 +175,7 @@
             const room = chatRooms.find(r => r.id === roomId);
             const list = document.getElementById('msg-list');
             if(!list) return;
-            list.innerHTML = room.messages.length === 0 
-                ? `<div class="text-center text-gray-600 text-sm pt-10 font-bold">대화가 없습니다.</div>`
-                : room.messages.map(m => `
+            list.innerHTML = room.messages.map(m => `
                 <div class="flex ${m.isMe ? 'justify-end' : 'justify-start'} items-end gap-2">
                     <div class="flex flex-col ${m.isMe ? 'items-end' : 'items-start'} max-w-[80%]">
                         <div class="px-5 py-3 ${m.isMe ? 'chat-me' : 'chat-other'} font-semibold shadow-md text-[15px]">
@@ -208,6 +199,7 @@
                 time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
             input.value = '';
+            saveData();
             renderChatContent(roomId);
         }
 
@@ -218,6 +210,7 @@
                 reader.onload = (e) => {
                     const now = new Date();
                     room.messages.push({ isMe: true, type: 'image', content: e.target.result, time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0') });
+                    saveData();
                     renderChatContent(roomId);
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -229,6 +222,7 @@
             const invite = document.getElementById('new-invite').value;
             if(!name) return;
             chatRooms.push({ id: Date.now(), name: name, sub: invite, messages: [] });
+            saveData();
             togglePopup();
             showView('list');
         }
@@ -238,8 +232,9 @@
             document.getElementById('popup-overlay').classList.toggle('hidden');
         }
 
-        // 시작 시 로그인 화면 보여주기
-        showView('login');
+        // 초기 시작
+        if(isLoggedIn) showView('list');
+        else showView('login');
         lucide.createIcons();
     </script>
 </body>
