@@ -13,13 +13,10 @@
         .chat-me { border-radius: 22px 4px 22px 22px; background-color: #1E0A40; color: white; }
         .chat-other { border-radius: 4px 22px 22px 22px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #F0F0F0; }
         
-        /* 15각형 별 모양 뱃지 스타일 */
         .star-badge {
-            width: 18px; height: 18px;
-            background-color: #A855F7;
+            width: 18px; height: 18px; background-color: #A855F7;
             clip-path: polygon(100% 50%, 94.45% 69.45%, 79.45% 84.45%, 60.45% 91.45%, 39.55% 91.45%, 20.55% 84.45%, 5.55% 69.45%, 0% 50%, 5.55% 30.55%, 20.55% 15.55%, 39.55% 8.55%, 60.45% 8.55%, 79.45% 15.55%, 94.45% 30.55%);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 10px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;
         }
         
         .delete-btn { opacity: 0.3; transition: opacity 0.2s; cursor: pointer; }
@@ -38,25 +35,19 @@
         <main id="main-content" class="flex-1 overflow-y-auto hide-scroll relative bg-[#F8F4FF]"></main>
 
         <div id="popup-overlay" class="hidden absolute inset-0 bg-black/10 z-[70]" onclick="togglePopup()"></div>
-        <div id="add-chat-popup" class="hidden absolute top-[110px] right-5 bg-white border-4 border-[#1E0A40] rounded-[40px] p-8 w-[300px] z-[80] shadow-2xl">
-            <div class="space-y-4 text-left">
-                <div><label class="block font-black mb-1 text-xs ml-2 uppercase">Room Name</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none text-sm"></div>
+        <div id="add-chat-popup" class="hidden absolute top-[110px] right-5 bg-white border-4 border-[#1E0A40] rounded-[40px] p-8 w-[300px] z-[80] shadow-2xl text-left">
+            <div class="space-y-4">
+                <div><label class="block font-black mb-1 text-xs ml-2 uppercase">Room Name</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none text-sm uppercase font-bold px-5"></div>
                 <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2 uppercase">Create</button>
             </div>
         </div>
 
         <footer id="nav-bar" class="w-full h-20 bg-white border-t border-purple-50 flex justify-around items-center z-[60]">
-            <button onclick="showView('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]">
-                <i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Chats</span>
-            </button>
-            <button onclick="showView('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300">
-                <i data-lucide="settings" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Setting</span>
-            </button>
+            <button onclick="showView('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]"><i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Chats</span></button>
+            <button onclick="showView('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300"><i data-lucide="settings" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Setting</span></button>
         </footer>
 
-        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden">
-            <i data-lucide="plus"></i>
-        </button>
+        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden active:scale-90 transition-all"><i data-lucide="plus"></i></button>
     </div>
 
     <script>
@@ -67,7 +58,7 @@
 
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let chatRooms = JSON.parse(localStorage.getItem('chatRooms')) || [
-            { id: 1, name: "KILLIN'", sub: "레이나, 한설, 리에", messages: [] }
+            { id: 1, name: "KILLIN'", sub: "REINA, HANSEOL...", messages: [] }
         ];
 
         function saveData() {
@@ -102,7 +93,7 @@
                 plusBtn.classList.remove('hidden');
                 document.getElementById('nav-chat').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-set').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `<div class="p-5 space-y-4 mt-16 pb-24">${chatRooms.map(room => `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all"><div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40] uppercase">${room.name[0]}</div><div class="flex-1 text-left"><h3 class="text-white text-2xl font-[900] tracking-tight uppercase">${room.name}</h3><p class="text-gray-400 text-xs truncate">${room.sub}</p></div></div>`).join('')}</div>`;
+                content.innerHTML = `<div class="p-5 space-y-4 mt-16 pb-24">${chatRooms.map(room => `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all"><div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40] uppercase">${room.name[0]}</div><div class="flex-1 text-left overflow-hidden"><h3 class="text-white text-2xl font-[900] tracking-tight uppercase">${room.name}</h3><p class="text-gray-400 text-xs truncate uppercase opacity-60">${room.sub}</p></div></div>`).join('')}</div>`;
             } 
             else if(view === 'setting') {
                 document.getElementById('nav-set').classList.replace('text-gray-300', 'text-[#1E0A40]');
@@ -111,7 +102,7 @@
             } 
             else if(view === 'chat') {
                 let room = chatRooms.find(r => r.id === roomId);
-                content.innerHTML = `<div class="flex flex-col h-full bg-white"><div class="p-5 flex items-center gap-4 border-b border-gray-100 sticky top-0 bg-white z-20"><button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button><h2 class="text-[#1E0A40] font-[900] text-xl tracking-tighter uppercase">${room.name}</h2></div><div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-8 hide-scroll pb-10"><div id="msg-list" class="space-y-8 pt-5"></div></div><div class="p-4 flex items-center gap-2 pb-10 border-t border-gray-50"><input type="text" id="m-input" placeholder="Aa" class="flex-1 bg-gray-50 border border-gray-100 rounded-[20px] p-4 text-[#1E0A40] outline-none"><button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-8 py-4 rounded-[20px] font-[900] uppercase">Send</button></div></div>`;
+                content.innerHTML = `<div class="flex flex-col h-full bg-white"><div class="p-5 flex items-center gap-4 border-b border-gray-100 sticky top-0 bg-white z-20"><button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button><h2 class="text-[#1E0A40] font-[900] text-xl tracking-tighter uppercase">${room.name}</h2></div><div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-8 hide-scroll pb-10"><div id="msg-list" class="space-y-8 pt-5"></div></div><div class="p-4 flex items-center gap-2 pb-10 border-t border-gray-50"><label class="bg-gray-100 w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all"><i data-lucide="camera" class="w-6 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})"></label><input type="text" id="m-input" placeholder="Aa" class="flex-1 bg-gray-50 border border-gray-100 rounded-[20px] p-4 text-[#1E0A40] outline-none font-medium"><button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-8 py-4 rounded-[20px] font-[900] uppercase active:scale-90 transition-all">Send</button></div></div>`;
                 renderChatContent(roomId);
             }
             lucide.createIcons();
@@ -125,12 +116,15 @@
             list.innerHTML = room.messages.map((m, index) => {
                 const isMe = m.senderId === currentUser.id;
                 const displayName = m.senderName || m.senderId;
+                const isImage = m.type === 'image';
 
                 if(isMe) {
                     return `<div class="flex justify-end items-end gap-2">
                         <button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mb-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         <div class="flex flex-col items-end max-w-[80%]">
-                            <div class="px-5 py-3 chat-me font-semibold text-[15px] leading-relaxed">${m.text}</div>
+                            <div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-me font-semibold text-[15px] leading-relaxed">
+                                ${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full shadow-sm">` : m.text}
+                            </div>
                             <span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span>
                         </div>
                     </div>`;
@@ -142,7 +136,9 @@
                                 <span class="text-[13px] font-[900] text-[#1E0A40] uppercase">${displayName}</span>
                                 <div class="star-badge"><i data-lucide="check" class="w-2 h-2"></i></div>
                             </div>
-                            <div class="px-5 py-3 chat-other font-semibold text-[15px] leading-relaxed">${m.text}</div>
+                            <div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-other font-semibold text-[15px] leading-relaxed">
+                                ${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full shadow-sm">` : m.text}
+                            </div>
                             <span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span>
                         </div>
                         <button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mt-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -170,8 +166,28 @@
             renderChatContent(roomId);
         }
 
+        function sendImage(input, roomId) {
+            const room = chatRooms.find(r => r.id === roomId);
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const now = new Date();
+                    room.messages.push({
+                        senderId: currentUser.id,
+                        senderName: currentUser.name,
+                        type: 'image',
+                        content: e.target.result,
+                        time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+                    });
+                    saveData();
+                    renderChatContent(roomId);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function deleteMsg(roomId, msgIndex) {
-            if(confirm("이 메시지를 삭제하시겠습니까?")) {
+            if(confirm("DELETE THIS MESSAGE?")) {
                 const room = chatRooms.find(r => r.id === roomId);
                 room.messages.splice(msgIndex, 1);
                 saveData();
