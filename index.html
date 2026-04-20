@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAPE - ARCADE SOCIAL</title>
+    <title>SHAPE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #F8F4FF; color: #1E0A40; margin: 0; padding: 0; overflow: hidden; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .bubble-popup {
-            position: absolute; top: 110px; right: 20px; background: white; border-radius: 40px;
-            padding: 30px; width: 300px; z-index: 100; border: 4px solid #1E0A40; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        .bubble-popup::after {
-            content: ''; position: absolute; top: -22px; right: 30px;
-            border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 20px solid #1E0A40;
-        }
-        /* 말풍선 스타일 */
-        .chat-me { border-radius: 20px 4px 20px 20px; background-color: #1E0A40; color: white; text-align: left; }
-        .chat-other { border-radius: 4px 20px 20px 20px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #E5E7EB; text-align: left; }
-        .badge-gradient { background: linear-gradient(to right, #E2B7FD, #A855F7); }
+        /* 말풍선 스타일 정밀 교정 */
+        .chat-me { border-radius: 22px 4px 22px 22px; background-color: #1E0A40; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .chat-other { border-radius: 4px 22px 22px 22px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #F0F0F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .badge-gradient { background: linear-gradient(135deg, #E2B7FD 0%, #A855F7 100%); }
         input { font-size: 16px !important; }
     </style>
 </head>
@@ -29,7 +21,7 @@
 
     <div id="app" class="w-full max-w-[450px] h-full bg-[#F8F4FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl">
         
-        <header id="main-header" class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md border-b border-purple-50 z-[60]">
+        <header id="main-header" class="flex items-center justify-between p-5 bg-white/90 backdrop-blur-md border-b border-purple-50 z-[60]">
             <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="checkAuthAndShow('list')">SHAPE</h1>
             <button id="make-btn" onclick="showView('login')" class="bg-gradient-to-br from-[#E2B7FD] to-[#A855F7] text-white px-6 py-2 rounded-2xl font-bold shadow-md active:scale-95 transition-all text-sm">MAKE</button>
         </header>
@@ -38,24 +30,24 @@
             </main>
 
         <div id="popup-overlay" class="hidden absolute inset-0 bg-black/10 z-[70]" onclick="togglePopup()"></div>
-        <div id="add-chat-popup" class="hidden bubble-popup z-[80]">
+        <div id="add-chat-popup" class="hidden absolute top-[110px] right-5 bg-white border-4 border-[#1E0A40] rounded-[40px] p-8 w-[300px] z-[80] shadow-2xl">
             <div class="space-y-4">
-                <div><label class="block font-black mb-1 ml-2 text-sm">채팅 초대자</label><input type="text" id="new-invite" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                <div><label class="block font-black mb-1 ml-2 text-sm">채팅방 이름</label><input type="text" id="new-room-name" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none"></div>
-                <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2">생성하기</button>
+                <div><label class="block font-black mb-1 text-xs ml-2">초대 멤버</label><input type="text" id="new-invite" placeholder="REINA, HANSEOL..." class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none text-sm"></div>
+                <div><label class="block font-black mb-1 text-xs ml-2">방 이름</label><input type="text" id="new-room-name" placeholder="방 제목 입력" class="w-full bg-[#1E0A40] rounded-full p-3 text-white outline-none text-sm"></div>
+                <button onclick="addNewRoom()" class="w-full py-3 bg-[#E2B7FD] rounded-full font-black text-[#1E0A40] mt-2 active:scale-95 transition-transform">CREATE</button>
             </div>
         </div>
 
         <footer id="nav-bar" class="w-full h-20 bg-white border-t border-purple-50 flex justify-around items-center z-[60]">
             <button onclick="checkAuthAndShow('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]">
-                <i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-xs font-bold">채팅</span>
+                <i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-[10px] font-bold">CHATS</span>
             </button>
             <button onclick="checkAuthAndShow('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300">
-                <i data-lucide="settings" class="w-7 h-7"></i><span class="text-xs font-bold">설정</span>
+                <i data-lucide="settings" class="w-7 h-7"></i><span class="text-[10px] font-bold">SETTING</span>
             </button>
         </footer>
 
-        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden">
+        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden active:scale-90 transition-transform">
             <i data-lucide="plus"></i>
         </button>
     </div>
@@ -67,14 +59,19 @@
         const mainHeader = document.getElementById('main-header');
         const makeBtn = document.getElementById('make-btn');
 
+        // [데이터 관리]
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        let myProfile = JSON.parse(localStorage.getItem('myProfile')) || { name: "GARIN", id: "GARIN" };
+        let myProfile = JSON.parse(localStorage.getItem('myProfile')) || { name: "GARIN", id: "GARIN_OFFICIAL" };
         let chatRooms = JSON.parse(localStorage.getItem('chatRooms')) || [
-            { id: 1, name: "KILLIN'", sub: "가린, 레이나, 한설, 리에", messages: [
-                { sender: 'REINA', text: "루카님 사랑해용💜", time: "17:10", isMe: false },
-                { sender: 'HANSEOL', text: "디자인 대박 예뻐요!", time: "17:12", isMe: false }
-            ]},
-            { id: 2, name: "Shape", sub: "공식 채팅방", messages: [] }
+            { 
+                id: 1, 
+                name: "KILLIN'", 
+                sub: "레이나, 한설, 리에", 
+                messages: [
+                    { senderId: 'REINA', senderName: 'REINA', text: "루카님 디자인 너무 힙해요! 💜", time: "17:10" },
+                    { senderId: 'HANSEOL', senderName: 'HANSEOL', text: "이거 진짜 실시간인가요? 대박...", time: "17:12" }
+                ] 
+            }
         ];
 
         function saveData() {
@@ -102,12 +99,12 @@
             if(view === 'login') {
                 content.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full p-8 pb-32">
-                        <div class="bubble-popup !static !w-full !translate-y-0">
-                            <h2 class="text-2xl font-black mb-6 text-center tracking-tighter">LOGIN</h2>
-                            <div class="space-y-4">
-                                <div><label class="font-black text-sm ml-2 text-left block">ID</label><input type="text" id="login-id" placeholder="${myProfile.id}" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
-                                <div><label class="font-black text-sm ml-2 text-left block">PW</label><input type="password" id="login-pw" placeholder="1234" class="w-full bg-[#1E0A40] rounded-full p-3 px-5 text-white outline-none"></div>
-                                <button onclick="handleLogin()" class="w-full py-4 bg-[#1E0A40] text-white rounded-full font-black mt-4">LOGIN</button>
+                        <div class="bg-white border-4 border-[#1E0A40] rounded-[40px] p-10 w-full shadow-xl">
+                            <h2 class="text-3xl font-[900] mb-8 text-center tracking-tighter">HELLO.</h2>
+                            <div class="space-y-5">
+                                <div><label class="font-black text-xs ml-2 block mb-1">USER ID</label><input type="text" id="login-id" value="${myProfile.id}" class="w-full bg-[#1E0A40] rounded-full p-4 text-white outline-none"></div>
+                                <div><label class="font-black text-xs ml-2 block mb-1">PASSWORD</label><input type="password" id="login-pw" placeholder="••••" class="w-full bg-[#1E0A40] rounded-full p-4 text-white outline-none"></div>
+                                <button onclick="handleLogin()" class="w-full py-4 bg-[#1E0A40] text-white rounded-full font-black mt-4 active:scale-95 transition-all">SIGN IN</button>
                             </div>
                         </div>
                     </div>`;
@@ -116,47 +113,44 @@
                 plusBtn.classList.remove('hidden');
                 document.getElementById('nav-chat').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-set').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `<div class="p-4 space-y-4 mt-16 pb-24">${chatRooms.map(room => renderListItem(room)).join('')}</div>`;
+                content.innerHTML = `<div class="p-5 space-y-4 mt-16 pb-24">${chatRooms.map(room => `
+                    <div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all cursor-pointer">
+                        <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
+                        <div class="flex-1 overflow-hidden"><h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3><p class="text-gray-400 text-xs truncate">${room.sub}</p></div>
+                    </div>`).join('')}</div>`;
             } 
             else if(view === 'setting') {
                 document.getElementById('nav-set').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-chat').classList.replace('text-[#1E0A40]', 'text-gray-300');
                 content.innerHTML = `
-                    <div class="p-8 space-y-6 text-left">
-                        <div><label class="font-black text-xl">NEW NAME</label><input type="text" id="set-name" value="${myProfile.name}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
-                        <div><label class="font-black text-xl">NEW ID</label><input type="text" id="set-id" value="${myProfile.id}" class="w-full h-14 bg-[#1E0A40] rounded-[20px] mt-2 px-6 text-white outline-none"></div>
-                        <button onclick="saveSettings()" class="w-full py-4 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[20px] font-black shadow-lg">SAVE SETTINGS</button>
+                    <div class="p-8 space-y-8">
+                        <div class="space-y-4">
+                            <div><label class="font-black text-lg block">DISPLAY NAME</label><input type="text" id="set-name" value="${myProfile.name}" class="w-full h-16 bg-[#1E0A40] rounded-[25px] mt-2 px-6 text-white outline-none font-bold text-xl"></div>
+                            <div><label class="font-black text-lg block">ACCOUNT ID</label><input type="text" id="set-id" value="${myProfile.id}" class="w-full h-16 bg-[#1E0A40] rounded-[25px] mt-2 px-6 text-white outline-none font-bold text-xl opacity-80"></div>
+                        </div>
+                        <button onclick="saveSettings()" class="w-full py-5 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[25px] font-[900] text-xl shadow-lg active:scale-95 transition-all">SAVE CHANGES</button>
                     </div>`;
             } 
             else if(view === 'chat') {
-                let currentRoom = chatRooms.find(r => r.id === roomId);
+                let room = chatRooms.find(r => r.id === roomId);
                 content.innerHTML = `
-                    <div class="flex flex-col h-full bg-[#F9FAFB]">
-                        <div class="p-4 flex items-center gap-4 bg-white border-b border-gray-100 sticky top-0 z-20">
-                            <button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button>
-                            <h2 class="text-[#1E0A40] font-[900] text-2xl tracking-tighter">${currentRoom.name}</h2>
+                    <div class="flex flex-col h-full bg-[#FFFFFF]">
+                        <div class="p-5 flex items-center gap-4 bg-white border-b border-gray-100 sticky top-0 z-20">
+                            <button onclick="showView('list')" class="bg-[#1E0A40] text-white w-11 h-11 rounded-2xl flex items-center justify-center font-bold">←</button>
+                            <h2 class="text-[#1E0A40] font-[900] text-2xl tracking-tighter">${room.name}</h2>
                         </div>
-                        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-8 hide-scroll pt-10">
+                        <div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-10 hide-scroll pb-10">
                             <div id="msg-list" class="space-y-8"></div>
                         </div>
-                        <div class="p-4 bg-white flex items-center gap-2 pb-8 border-t border-gray-50">
-                            <label class="bg-gray-100 w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer">
-                                <i data-lucide="camera" class="w-6 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})">
-                            </label>
-                            <input type="text" id="m-input" placeholder="메시지..." class="flex-1 bg-gray-50 border border-gray-100 rounded-2xl p-3 text-[#1E0A40] outline-none">
-                            <button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-6 py-3 rounded-2xl font-[900]">send</button>
+                        <div class="p-4 bg-white flex items-center gap-2 pb-10 border-t border-gray-50">
+                            <label class="bg-gray-100 w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all"><i data-lucide="camera" class="w-6 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})"></label>
+                            <input type="text" id="m-input" placeholder="Aa" class="flex-1 bg-gray-50 border border-gray-100 rounded-[20px] p-4 text-[#1E0A40] outline-none font-medium">
+                            <button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-8 py-4 rounded-[20px] font-[900] active:scale-90 transition-all">SEND</button>
                         </div>
                     </div>`;
                 renderChatContent(roomId);
             }
             lucide.createIcons();
-        }
-
-        function renderListItem(room) {
-            return `<div onclick="showView('chat', ${room.id})" class="bg-[#1E0A40] p-6 rounded-[35px] flex items-center gap-4 shadow-xl active:scale-95 transition-all mb-4">
-                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40]">${room.name[0]}</div>
-                <div class="flex-1 text-left"><h3 class="text-white text-2xl font-[900] tracking-tight">${room.name}</h3><p class="text-gray-400 text-sm truncate w-40">${room.sub}</p></div>
-            </div>`;
         }
 
         function renderChatContent(roomId) {
@@ -165,29 +159,28 @@
             if(!list) return;
             
             list.innerHTML = room.messages.map(m => {
-                if(m.isMe) {
-                    // 내 말풍선 (오른쪽)
-                    return `
-                    <div class="flex justify-end items-end gap-2 px-2">
-                        <div class="flex flex-col items-end max-w-[75%]">
-                            <div class="px-5 py-3 chat-me font-semibold shadow-sm text-[15px]">${m.text}</div>
-                            <span class="text-[10px] text-gray-400 mt-1 font-bold">${m.time}</span>
+                // [중요] 피아식별 로직: 메시지의 senderId가 내 id와 같으면 오른쪽!
+                const isMe = m.senderId === myProfile.id;
+
+                if(isMe) {
+                    return `<div class="flex justify-end items-end gap-2">
+                        <div class="flex flex-col items-end max-w-[80%]">
+                            <div class="px-5 py-3 chat-me font-semibold text-[15px] leading-relaxed">${m.text}</div>
+                            <span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span>
                         </div>
                     </div>`;
                 } else {
-                    // 남의 말풍선 (왼쪽 + 프사 + 이름 + 뱃지)
-                    return `
-                    <div class="flex justify-start items-start gap-3 px-2">
-                        <div class="w-11 h-11 rounded-2xl bg-purple-200 flex-shrink-0 flex items-center justify-center font-black text-[#1E0A40] border-2 border-white shadow-sm overflow-hidden">
-                            <img src="https://i.pravatar.cc/100?u=${m.sender}" class="w-full h-full object-cover">
+                    return `<div class="flex justify-start items-start gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-100 flex-shrink-0 border-2 border-white shadow-sm overflow-hidden">
+                            <img src="https://i.pravatar.cc/150?u=${m.senderId}" class="w-full h-full object-cover">
                         </div>
-                        <div class="flex flex-col items-start max-w-[75%]">
+                        <div class="flex flex-col items-start max-w-[80%]">
                             <div class="flex items-center gap-1.5 mb-1.5">
-                                <span class="text-[13px] font-black text-[#1E0A40]">${m.sender}</span>
-                                <span class="badge-gradient text-[9px] text-white px-2 py-0.5 rounded-full font-bold">V-LABEL</span>
+                                <span class="text-[14px] font-black text-[#1E0A40]">${m.senderName}</span>
+                                <span class="badge-gradient text-[9px] text-white px-2 py-0.5 rounded-full font-black uppercase tracking-wider">V-IDOL</span>
                             </div>
-                            <div class="px-5 py-3 chat-other font-semibold shadow-sm text-[15px]">${m.text}</div>
-                            <span class="text-[10px] text-gray-400 mt-1 font-bold">${m.time}</span>
+                            <div class="px-5 py-3 chat-other font-semibold text-[15px] leading-relaxed">${m.text}</div>
+                            <span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span>
                         </div>
                     </div>`;
                 }
@@ -200,10 +193,11 @@
             const input = document.getElementById('m-input');
             const room = chatRooms.find(r => r.id === roomId);
             if(!input.value.trim()) return;
+            
             const now = new Date();
             room.messages.push({
-                isMe: true, // 내꺼라고 표시!
-                sender: myProfile.name,
+                senderId: myProfile.id, // 현재 로그인한 내 ID 주입
+                senderName: myProfile.name,
                 text: input.value,
                 time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
@@ -213,10 +207,23 @@
         }
 
         function saveSettings() {
-            myProfile.name = document.getElementById('set-name').value;
-            myProfile.id = document.getElementById('set-id').value;
+            const oldId = myProfile.id;
+            const newName = document.getElementById('set-name').value;
+            const newId = document.getElementById('set-id').value;
+            
+            // 내 프로필 업데이트
+            myProfile.name = newName;
+            myProfile.id = newId;
+
+            // 기존 메시지들의 senderId도 새 ID로 업데이트해줘야 '내 메시지'로 인식됨
+            chatRooms.forEach(room => {
+                room.messages.forEach(m => {
+                    if(m.senderId === oldId) m.senderId = newId;
+                });
+            });
+
             saveData();
-            alert("저장되었습니다!");
+            alert("프로필이 업데이트되었습니다!");
             showView('list');
         }
 
