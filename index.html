@@ -69,7 +69,8 @@
         function handleLogin() {
             const idInput = document.getElementById('login-id').value.trim();
             if(!idInput) return alert("ID를 입력하세요!");
-            currentUser = { id: idInput, name: idInput }; 
+            // 초기 로그인 시 기본 프사 설정
+            currentUser = { id: idInput, name: idInput, profileImg: `https://i.pravatar.cc/100?u=${idInput}` }; 
             saveData();
             showView('list');
         }
@@ -98,7 +99,24 @@
             else if(view === 'setting') {
                 document.getElementById('nav-set').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-chat').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `<div class="p-8 space-y-8 text-left"><div><label class="font-black text-lg block uppercase">Profile Name</label><input type="text" id="set-name" value="${currentUser.name}" class="w-full h-16 bg-[#1E0A40] rounded-[25px] mt-2 px-6 text-white outline-none font-bold text-xl uppercase"></div><button onclick="saveSettings()" class="w-full py-5 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[25px] font-[900] text-xl uppercase shadow-lg">Save</button></div>`;
+                content.innerHTML = `
+                    <div class="p-8 space-y-8 text-center">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-32 h-32 rounded-[40px] bg-white border-4 border-[#1E0A40] overflow-hidden shadow-lg relative group">
+                                <img id="setting-img-preview" src="${currentUser.profileImg}" class="w-full h-full object-cover">
+                                <label class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
+                                    <i data-lucide="camera" class="w-8 h-8"></i>
+                                    <input type="file" class="hidden" onchange="previewProfileImg(this)">
+                                </label>
+                            </div>
+                            <p class="text-[10px] font-black uppercase text-[#1E0A40] opacity-50">Click Image to Change</p>
+                        </div>
+                        <div class="text-left">
+                            <label class="font-black text-lg block uppercase">Profile Name</label>
+                            <input type="text" id="set-name" value="${currentUser.name}" class="w-full h-16 bg-[#1E0A40] rounded-[25px] mt-2 px-6 text-white outline-none font-bold text-xl uppercase">
+                        </div>
+                        <button onclick="saveSettings()" class="w-full py-5 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[25px] font-[900] text-xl uppercase shadow-lg active:scale-95 transition-all">Save Changes</button>
+                    </div>`;
             } 
             else if(view === 'chat') {
                 let room = chatRooms.find(r => r.id === roomId);
@@ -106,6 +124,17 @@
                 renderChatContent(roomId);
             }
             lucide.createIcons();
+        }
+
+        function previewProfileImg(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('setting-img-preview').src = e.target.result;
+                    currentUser.profileImg = e.target.result; // 임시 저장
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         function renderChatContent(roomId) {
@@ -117,6 +146,8 @@
                 const isMe = m.senderId === currentUser.id;
                 const displayName = m.senderName || m.senderId;
                 const isImage = m.type === 'image';
+                // 내가 보낸 메시지면 현재 내 프사를, 아니면 저장된 프사 사용
+                const profileImg = isMe ? currentUser.profileImg : (m.senderProfile || `https://i.pravatar.cc/100?u=${m.senderId}`);
 
                 if(isMe) {
                     return `<div class="flex justify-end items-end gap-2">
@@ -130,7 +161,7 @@
                     </div>`;
                 } else {
                     return `<div class="flex justify-start items-start gap-3">
-                        <div class="w-11 h-11 rounded-2xl bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center font-black overflow-hidden"><img src="https://i.pravatar.cc/100?u=${m.senderId}" class="w-full h-full object-cover"></div>
+                        <div class="w-11 h-11 rounded-2xl bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden"><img src="${profileImg}" class="w-full h-full object-cover"></div>
                         <div class="flex flex-col items-start max-w-[80%]">
                             <div class="flex items-center gap-1.5 mb-1.5">
                                 <span class="text-[13px] font-[900] text-[#1E0A40] uppercase">${displayName}</span>
@@ -158,6 +189,7 @@
             room.messages.push({
                 senderId: currentUser.id,
                 senderName: currentUser.name,
+                senderProfile: currentUser.profileImg, // 현재 프사 정보 저장
                 text: input.value,
                 time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
@@ -175,6 +207,7 @@
                     room.messages.push({
                         senderId: currentUser.id,
                         senderName: currentUser.name,
+                        senderProfile: currentUser.profileImg,
                         type: 'image',
                         content: e.target.result,
                         time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
