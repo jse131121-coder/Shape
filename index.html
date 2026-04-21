@@ -2,14 +2,29 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SHAPE - ARCADE SOCIAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #F8F4FF; color: #1E0A40; margin: 0; padding: 0; overflow: hidden; }
+        
+        /* 화면 고정 및 스크롤 설정 */
+        html, body { 
+            position: fixed; 
+            overflow: hidden; 
+            width: 100%; 
+            height: 100%; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F8F4FF; 
+            color: #1E0A40; 
+            margin: 0; 
+            padding: 0; 
+        }
+
         .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        /* 채팅 말풍선 및 레이아웃 */
         .chat-me { border-radius: 22px 4px 22px 22px; background-color: #1E0A40; color: white; white-space: pre-wrap; word-break: break-all; }
         .chat-other { border-radius: 4px 22px 22px 22px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #F0F0F0; white-space: pre-wrap; word-break: break-all; }
         
@@ -24,15 +39,17 @@
         .room-delete-btn { color: rgba(255,255,255,0.4); transition: color 0.2s; }
         .room-delete-btn:hover { color: #FF4D4D; }
 
-        /* 줄바꿈을 위한 텍스트에어리어 스타일 */
-        #m-input { resize: none; max-height: 120px; min-height: 56px; }
+        #m-input { resize: none; max-height: 100px; min-height: 48px; }
+        
+        /* 모바일 앱 느낌의 높이 고정 */
+        #app { height: 100dvh; width: 100%; max-width: 450px; display: flex; flex-direction: column; }
     </style>
 </head>
-<body class="flex justify-center items-center h-screen bg-gray-100">
+<body class="flex justify-center items-center">
 
-    <div id="app" class="w-full max-w-[450px] h-full bg-[#F8F4FF] flex flex-col relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white shadow-2xl">
+    <div id="app" class="bg-[#F8F4FF] relative overflow-hidden md:h-[95vh] md:rounded-[3rem] md:border-[10px] md:border-white md:shadow-2xl">
         
-        <header id="main-header" class="flex items-center justify-between p-5 bg-white/90 backdrop-blur-md border-b border-purple-50 z-[60]">
+        <header id="main-header" class="flex items-center justify-between p-5 bg-white/90 backdrop-blur-md border-b border-purple-50 z-[60] shrink-0">
             <h1 class="text-3xl font-[900] tracking-tighter cursor-pointer" onclick="showView('list')">SHAPE</h1>
             <button id="logout-btn" onclick="handleLogout()" class="bg-gray-100 text-[#1E0A40] px-4 py-2 rounded-xl font-bold text-xs uppercase">Logout</button>
         </header>
@@ -47,7 +64,7 @@
             </div>
         </div>
 
-        <footer id="nav-bar" class="w-full h-20 bg-white border-t border-purple-50 flex justify-around items-center z-[60]">
+        <footer id="nav-bar" class="w-full h-20 bg-white border-t border-purple-50 flex justify-around items-center z-[60] shrink-0 pb-safe">
             <button onclick="showView('list')" id="nav-chat" class="flex flex-col items-center gap-1 text-[#1E0A40]"><i data-lucide="message-circle" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Chats</span></button>
             <button onclick="showView('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300"><i data-lucide="settings" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Setting</span></button>
         </footer>
@@ -98,7 +115,7 @@
                 plusBtn.classList.remove('hidden');
                 document.getElementById('nav-chat').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-set').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `<div class="p-5 space-y-4 mt-16 pb-24">${chatRooms.map(room => `
+                content.innerHTML = `<div class="p-5 space-y-4 mt-5 pb-24">${chatRooms.map(room => `
                     <div class="relative group bg-[#1E0A40] rounded-[35px] shadow-xl overflow-hidden active:scale-[0.98] transition-all">
                         <div onclick="showView('chat', ${room.id})" class="p-6 flex items-center gap-4 cursor-pointer">
                             <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40] uppercase shrink-0">${room.name[0]}</div>
@@ -110,8 +127,7 @@
             else if(view === 'setting') {
                 document.getElementById('nav-set').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-chat').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `
-                    <div class="p-8 space-y-8 text-center">
+                content.innerHTML = `<div class="p-8 space-y-8 text-center">
                         <div class="flex flex-col items-center gap-4">
                             <div class="w-32 h-32 rounded-[40px] bg-white border-4 border-[#1E0A40] overflow-hidden shadow-lg relative group">
                                 <img id="setting-img-preview" src="${currentUser.profileImg}" class="w-full h-full object-cover">
@@ -120,7 +136,6 @@
                                     <input type="file" class="hidden" onchange="previewProfileImg(this)">
                                 </label>
                             </div>
-                            <p class="text-[10px] font-black uppercase text-[#1E0A40] opacity-50">Click Image to Change</p>
                         </div>
                         <div class="text-left"><label class="font-black text-lg block uppercase">Profile Name</label><input type="text" id="set-name" value="${currentUser.name}" class="w-full h-16 bg-[#1E0A40] rounded-[25px] mt-2 px-6 text-white outline-none font-bold text-xl uppercase"></div>
                         <button onclick="saveSettings()" class="w-full py-5 bg-gradient-to-r from-[#E2B7FD] to-[#A855F7] text-white rounded-[25px] font-[900] text-xl uppercase shadow-lg active:scale-95 transition-all">Save Changes</button>
@@ -129,15 +144,15 @@
             else if(view === 'chat') {
                 let room = chatRooms.find(r => r.id === roomId);
                 content.innerHTML = `<div class="flex flex-col h-full bg-white">
-                    <div class="p-5 flex items-center gap-4 border-b border-gray-100 sticky top-0 bg-white z-20">
+                    <div class="p-5 flex items-center gap-4 border-b border-gray-100 shrink-0">
                         <button onclick="showView('list')" class="bg-[#1E0A40] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold">←</button>
                         <h2 class="text-[#1E0A40] font-[900] text-xl tracking-tighter uppercase">${room.name}</h2>
                     </div>
-                    <div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-8 hide-scroll pb-10"><div id="msg-list" class="space-y-8 pt-5"></div></div>
-                    <div class="p-4 flex items-end gap-2 pb-10 border-t border-gray-50">
-                        <label class="bg-gray-100 w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all shrink-0"><i data-lucide="camera" class="w-6 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})"></label>
-                        <textarea id="m-input" placeholder="Aa" rows="1" class="flex-1 bg-gray-50 border border-gray-100 rounded-[20px] p-4 text-[#1E0A40] outline-none font-medium hide-scroll" oninput="autoResize(this)"></textarea>
-                        <button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-6 py-4 rounded-[20px] font-[900] uppercase active:scale-90 transition-all shrink-0">Send</button>
+                    <div id="chat-box" class="flex-1 overflow-y-auto p-5 space-y-8 hide-scroll"><div id="msg-list" class="space-y-8 pt-5"></div></div>
+                    <div class="p-4 flex items-end gap-2 pb-10 border-t border-gray-50 shrink-0">
+                        <label class="bg-gray-100 w-12 h-12 rounded-2xl flex items-center justify-center cursor-pointer active:scale-90 transition-all shrink-0"><i data-lucide="camera" class="w-5 text-[#1E0A40]"></i><input type="file" class="hidden" onchange="sendImage(this, ${roomId})"></label>
+                        <textarea id="m-input" placeholder="Aa" rows="1" class="flex-1 bg-gray-50 border border-gray-100 rounded-[20px] p-3 text-[#1E0A40] outline-none font-medium hide-scroll" oninput="autoResize(this)"></textarea>
+                        <button onclick="sendMsg(${roomId})" class="bg-[#1E0A40] text-white px-5 py-3 rounded-[20px] font-[900] uppercase active:scale-90 transition-all shrink-0">Send</button>
                     </div>
                 </div>`;
                 renderChatContent(roomId);
@@ -177,14 +192,13 @@
             
             list.innerHTML = room.messages.map((m, index) => {
                 const isMe = m.senderId === currentUser.id;
-                const displayName = m.senderName || m.senderId;
-                const isImage = m.type === 'image';
                 const profileImg = isMe ? currentUser.profileImg : (m.senderProfile || `https://i.pravatar.cc/100?u=${m.senderId}`);
+                const isImage = m.type === 'image';
 
                 if(isMe) {
-                    return `<div class="flex justify-end items-end gap-2"><button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mb-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button><div class="flex flex-col items-end max-w-[80%]"><div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-me font-semibold text-[15px] leading-relaxed">${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full">` : m.text}</div><span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span></div></div>`;
+                    return `<div class="flex justify-end items-end gap-2"><button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mb-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button><div class="flex flex-col items-end max-w-[80%]"><div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-me font-semibold text-[15px]">${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full">` : m.text}</div><span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span></div></div>`;
                 } else {
-                    return `<div class="flex justify-start items-start gap-3"><div class="w-11 h-11 rounded-2xl bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden"><img src="${profileImg}" class="w-full h-full object-cover"></div><div class="flex flex-col items-start max-w-[80%]"><div class="flex items-center gap-1.5 mb-1.5"><span class="text-[13px] font-[900] text-[#1E0A40] uppercase">${displayName}</span><div class="star-badge"><i data-lucide="check" class="w-2 h-2"></i></div></div><div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-other font-semibold text-[15px] leading-relaxed">${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full">` : m.text}</div><span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span></div><button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mt-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                    return `<div class="flex justify-start items-start gap-3"><div class="w-11 h-11 rounded-2xl bg-gray-200 overflow-hidden shrink-0"><img src="${profileImg}" class="w-full h-full object-cover"></div><div class="flex flex-col items-start max-w-[80%]"><div class="flex items-center gap-1.5 mb-1.5"><span class="text-[13px] font-[900] text-[#1E0A40] uppercase">${m.senderName}</span><div class="star-badge"><i data-lucide="check" class="w-2 h-2"></i></div></div><div class="${isImage ? 'p-1' : 'px-5 py-3'} chat-other font-semibold text-[15px]">${isImage ? `<img src="${m.content}" class="rounded-2xl max-w-full">` : m.text}</div><span class="text-[10px] text-gray-400 mt-1 font-bold uppercase">${m.time}</span></div><button onclick="deleteMsg(${roomId}, ${index})" class="delete-btn mt-6"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                 }
             }).join('');
             const box = document.getElementById('chat-box');
@@ -198,16 +212,10 @@
             if(!input.value.trim()) return;
             const now = new Date();
             room.messages.push({
-                senderId: currentUser.id,
-                senderName: currentUser.name,
-                senderProfile: currentUser.profileImg,
-                text: input.value,
-                time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+                senderId: currentUser.id, senderName: currentUser.name, senderProfile: currentUser.profileImg,
+                text: input.value, time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
             });
-            input.value = '';
-            input.style.height = 'auto'; // 높이 초기화
-            saveData();
-            renderChatContent(roomId);
+            input.value = ''; input.style.height = 'auto'; saveData(); renderChatContent(roomId);
         }
 
         function sendImage(input, roomId) {
@@ -217,45 +225,32 @@
                 reader.onload = (e) => {
                     const now = new Date();
                     room.messages.push({
-                        senderId: currentUser.id,
-                        senderName: currentUser.name,
-                        senderProfile: currentUser.profileImg,
-                        type: 'image',
-                        content: e.target.result,
-                        time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
+                        senderId: currentUser.id, senderName: currentUser.name, senderProfile: currentUser.profileImg,
+                        type: 'image', content: e.target.result, time: now.getHours() + ":" + now.getMinutes().toString().padStart(2, '0')
                     });
-                    saveData();
-                    renderChatContent(roomId);
+                    saveData(); renderChatContent(roomId);
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
         function deleteMsg(roomId, msgIndex) {
-            if(confirm("DELETE THIS MESSAGE?")) {
-                const room = chatRooms.find(r => r.id === roomId);
-                room.messages.splice(msgIndex, 1);
-                saveData();
-                renderChatContent(roomId);
+            if(confirm("DELETE MESSAGE?")) {
+                chatRooms.find(r => r.id === roomId).messages.splice(msgIndex, 1);
+                saveData(); renderChatContent(roomId);
             }
         }
 
         function saveSettings() {
-            const newName = document.getElementById('set-name').value.trim();
-            if(!newName) return;
-            currentUser.name = newName;
-            saveData();
-            alert("SUCCESS");
-            showView('list');
+            currentUser.name = document.getElementById('set-name').value.trim();
+            saveData(); alert("SUCCESS"); showView('list');
         }
 
         function addNewRoom() {
             const name = document.getElementById('new-room-name').value.trim();
             if(!name) return;
-            chatRooms.push({ id: Date.now(), name: name, sub: "ADMIN: " + currentUser.name, messages: [] });
-            saveData();
-            togglePopup();
-            showView('list');
+            chatRooms.push({ id: Date.now(), name, sub: "ADMIN: " + currentUser.name, messages: [] });
+            saveData(); togglePopup(); showView('list');
         }
 
         function togglePopup() {
