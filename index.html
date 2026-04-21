@@ -9,7 +9,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        /* 화면 고정 및 스크롤 설정 */
         html, body { 
             position: fixed; 
             overflow: hidden; 
@@ -24,7 +23,6 @@
 
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* 채팅 말풍선 및 레이아웃 */
         .chat-me { border-radius: 22px 4px 22px 22px; background-color: #1E0A40; color: white; white-space: pre-wrap; word-break: break-all; }
         .chat-other { border-radius: 4px 22px 22px 22px; background-color: #FFFFFF; color: #1E0A40; border: 1.5px solid #F0F0F0; white-space: pre-wrap; word-break: break-all; }
         
@@ -41,7 +39,6 @@
 
         #m-input { resize: none; max-height: 100px; min-height: 48px; }
         
-        /* 모바일 앱 느낌의 높이 고정 */
         #app { height: 100dvh; width: 100%; max-width: 450px; display: flex; flex-direction: column; }
     </style>
 </head>
@@ -69,7 +66,7 @@
             <button onclick="showView('setting')" id="nav-set" class="flex flex-col items-center gap-1 text-gray-300"><i data-lucide="settings" class="w-7 h-7"></i><span class="text-[10px] font-bold uppercase">Setting</span></button>
         </footer>
 
-        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[100px] right-5 w-12 h-12 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-lg z-50 hidden active:scale-90 transition-all"><i data-lucide="plus"></i></button>
+        <button id="plus-btn" onclick="togglePopup()" class="absolute top-[90px] right-6 w-14 h-14 bg-[#1E0A40] text-white rounded-2xl flex items-center justify-center shadow-2xl z-50 hidden active:scale-90 transition-all border-4 border-white"><i data-lucide="plus"></i></button>
     </div>
 
     <script>
@@ -115,7 +112,8 @@
                 plusBtn.classList.remove('hidden');
                 document.getElementById('nav-chat').classList.replace('text-gray-300', 'text-[#1E0A40]');
                 document.getElementById('nav-set').classList.replace('text-[#1E0A40]', 'text-gray-300');
-                content.innerHTML = `<div class="p-5 space-y-4 mt-5 pb-24">${chatRooms.map(room => `
+                // mt-24를 주어 플러스 버튼과 첫 번째 채팅방이 겹치지 않게 여백 확보
+                content.innerHTML = `<div class="p-5 space-y-4 mt-24 pb-24">${chatRooms.map(room => `
                     <div class="relative group bg-[#1E0A40] rounded-[35px] shadow-xl overflow-hidden active:scale-[0.98] transition-all">
                         <div onclick="showView('chat', ${room.id})" class="p-6 flex items-center gap-4 cursor-pointer">
                             <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center font-black text-2xl text-[#1E0A40] uppercase shrink-0">${room.name[0]}</div>
